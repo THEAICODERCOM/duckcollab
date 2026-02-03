@@ -20,7 +20,6 @@ class HelpDropdown(discord.ui.Select):
             )
         ]
         
-        # Add category options
         for name, data in categories.items():
             options.append(discord.SelectOption(
                 label=name,
@@ -51,12 +50,10 @@ class HelpDropdown(discord.ui.Select):
             color=discord.Color.blue()
         )
 
-        # Sort commands by name
         sorted_cmds = sorted(category_data["commands"], key=lambda x: x.qualified_name)
 
         for cmd in sorted_cmds:
             if isinstance(cmd, commands.Group):
-                # For groups, show root and then subcommands
                 sub_cmds = list(cmd.walk_commands())
                 sub_text = "\n".join([f"  └─ `{s.qualified_name}`: {s.short_doc or 'No description'}" for s in sub_cmds])
                 embed.add_field(
@@ -65,7 +62,6 @@ class HelpDropdown(discord.ui.Select):
                     inline=False
                 )
             else:
-                # For regular commands
                 embed.add_field(
                     name=f"• `{cmd.qualified_name}`",
                     value=cmd.short_doc or "No description provided.",
@@ -105,11 +101,10 @@ def create_main_help_embed(bot: commands.Bot, categories: Dict[str, Any]):
         )
 
     embed.set_footer(text="Use the dropdown menu to see all commands in a category.")
-    embed.set_thumbnail(url="https://cdn.discordapp.com/embed/avatars/0.png") # Replace with bot avatar
+    embed.set_thumbnail(url="https://cdn.discordapp.com/embed/avatars/0.png")
     return embed
 
 def get_categories(bot: commands.Bot):
-    # Define categories and their commands/emojis
     cat_config = {
         "🦆 Gameplay": {"emoji": "🦆", "keywords": ["bang", "reload", "hug", "revive", "random_duck", "watchpaintdry"]},
         "📊 Statistics": {"emoji": "📊", "keywords": ["me", "shooting_stats", "best_times", "kills_stats", "hugs_stats", "hurt_stats", "resist_stats", "frighten_stats", "achievements", "top", "send_exp", "commands_used", "bot_users"]},
@@ -138,7 +133,6 @@ def get_categories(bot: commands.Bot):
                 "commands": cat_cmds
             }
 
-    # Catch-all for any missed commands
     standalone = [c for c in bot.commands if c.name not in processed_commands and c.name != "help"]
     if standalone:
         if "General" not in categories:
@@ -146,6 +140,7 @@ def get_categories(bot: commands.Bot):
         categories["General"]["commands"].extend(standalone)
     
     return categories
+
 
 # --- Bot Setup ---
 
@@ -160,6 +155,7 @@ class MyBot(commands.Bot):
         )
 
 bot = MyBot()
+
 
 # --- 🏷️ Tags Category ---
 
@@ -202,6 +198,7 @@ async def tags_delete(ctx):
 async def tags_raw(ctx):
     """View the raw version of the tag."""
     await ctx.send("Raw tag content...")
+
 
 # --- ⚙️ Settings Category ---
 
@@ -375,8 +372,7 @@ async def settings_channel_disabled_message(ctx):
     """Enable or disable the channel disabled message."""
     await ctx.send("Setting updated.")
 
-# Add more settings subcommands as needed from the file
-# ... (omitting some for brevity in this step, but I'll add the most important ones)
+
 
 # --- 🦆 Gameplay Category ---
 
@@ -409,6 +405,7 @@ async def random_duck(ctx):
 async def watchpaintdry(ctx):
     """Watch paint dry."""
     await ctx.send("🎨 Drying...")
+
 
 # --- 📊 Statistics Category ---
 
@@ -477,6 +474,7 @@ async def send_exp(ctx):
     """Send some of your experience to another player."""
     await ctx.send("EXP sent!")
 
+
 # --- 💰 Economy Category ---
 
 @bot.group(name="inventory", aliases=["inv"], invoke_without_command=True)
@@ -518,6 +516,7 @@ async def prestige_confirm(ctx):
 async def prestige_info(ctx):
     """More info about prestige."""
     await ctx.send("Prestige info...")
+
 
 # --- 💣 Landmines Category ---
 
@@ -600,6 +599,7 @@ async def place_alias(ctx):
 async def defuse_alias(ctx):
     """Alias for landmine defusal."""
     await ctx.send("Landmine defused!")
+
 
 # --- 👑 Administration Category ---
 
@@ -793,7 +793,6 @@ async def support_block(ctx):
     """Block user from opening DMs."""
     await ctx.send("User blocked.")
 
-# --- 🛠️ Utility Category ---
 
 @bot.command(name="ping")
 async def ping(ctx):
@@ -815,7 +814,6 @@ async def wiki(ctx):
     """Returns the wiki URL."""
     await ctx.send("Wiki link...")
 
-# --- Help Command ---
 
 @bot.command(name="help")
 async def help_command(ctx, *, query: str = None):
@@ -823,13 +821,10 @@ async def help_command(ctx, *, query: str = None):
     categories = get_categories(bot)
     
     if query:
-        # Check if query is a category
         for name, data in categories.items():
             if query.lower() in name.lower():
-                # Show category specific help (logic could be expanded)
                 pass
         
-        # Check if query is a command
         cmd = bot.get_command(query)
         if cmd:
             embed = discord.Embed(
@@ -847,7 +842,6 @@ async def help_command(ctx, *, query: str = None):
             await ctx.send(embed=embed)
             return
 
-    # Show main help menu
     view = HelpView(bot, categories)
     embed = create_main_help_embed(bot, categories)
     await ctx.send(embed=embed, view=view)
@@ -862,3 +856,4 @@ if __name__ == "__main__":
         bot.run(TOKEN)
     else:
         print("Error: DISCORD_TOKEN not found in .env file.")
+
